@@ -350,6 +350,76 @@ const processMeetings = async (domain, hubId, q) => {
 
       return [a.from.id, a.to.map(association => association.toObjectId)];
     }).filter(x => x));
+
+    for await (const meeting of data) {
+      if (!meeting.properties) {
+        continue;
+      }
+    
+      const isCreated = !lastPulledDate || (new Date(meeting.createdAt) > lastPulledDate);
+
+      const meetingContacts = meetingAssociations[meeting.id];
+      let meetingAttendees = [];
+    
+      // Here we aim to fetch every contact email
+      if (meetingContacts && meetingContacts.length > 0) {
+        const contactSearchObject = {
+          filterGroups: [
+            {
+              filters: [
+                {
+                  propertyName: 'id',
+                  operator: 'IN',
+                  value: meetingContacts.join(',')
+                }
+              ]
+            }
+          ],
+          properties: ['email']
+        };
+    
+        let contactSearchResults = {};
+        let tryCount = 0;
+
+        while (tryCount <= 4) {
+          try {
+            contactSearchResults = await hubspotClient.crm.contacts.searchApi.doSearch(contactSearchObject);
+            break;
+          } catch (err) {
+            tryCount++;
+    
+            if (new Date() > expirationDate) await refreshAccessToken(domain, hubId);
+    
+            await new Promise((resolve) => setTimeout(resolve, 5000 * Math.pow(2, tryCount)));
+          }
+        }
+    
+        if (!contactSearchResults) throw new Error('Failed to fetch meeting contacts for the 4th time. Aborting.');
+    
+        const contactData = contactSearchResults.results || [];
+    
+        meetingAttendees = contactData.map(contact => ({
+          id: contact.id,
+          properties: contact.properties
+        }));
+      }
+
+      const meetingProperties = {
+        meeting_id: meeting.id,
+        meeting_title: meeting.title,
+        meeting_contacts: meetingAttendees
+      };
+
+      const actionTemplate = {
+        includeInAnalytics: 0,
+        meetingProperties: filterNullValuesFromObject(meetingProperties)
+      };
+
+      q.push({
+        actionName: isCreated ? 'Meeting Created' : 'Meeting Updated',
+        actionDate: new Date(isCreated ? meeting.createdAt : meeting.updatedAt),
+      })
+    }
   }
 
   account.lastPulledDates.meetings = now;
