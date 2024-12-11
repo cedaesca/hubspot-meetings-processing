@@ -275,7 +275,8 @@ const processMeetings = async (domain, hubId, q) => {
   const limit = 100;
 
   while (hasMore) {
-    //
+    const lastModifiedDate = offsetObject.lastModifiedDate || lastPulledDate;
+    const lastModifiedDateFilter = generateLastModifiedDateFilter(lastModifiedDate, now, 'hs_lastmodifieddate');
   }
 
   account.lastPulledDates.meetings = now;
