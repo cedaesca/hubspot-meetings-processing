@@ -277,6 +277,40 @@ const processMeetings = async (domain, hubId, q) => {
   while (hasMore) {
     const lastModifiedDate = offsetObject.lastModifiedDate || lastPulledDate;
     const lastModifiedDateFilter = generateLastModifiedDateFilter(lastModifiedDate, now, 'hs_lastmodifieddate');
+
+    const searchObject = {
+      filterGroups: [lastModifiedDateFilter],
+      sorts: [{ propertyName: 'hs_lastmodifieddate', direction: 'ASCENDING' }],
+      properties: [
+        //
+      ],
+      limit,
+      after: offsetObject.after
+    };
+
+    let searchResult = {};
+
+    let tryCount = 0;
+    while (tryCount <= 4) {
+      try {
+        searchResult = await hubspotClient.crm.contacts.searchApi.doSearch(searchObject);
+        break;
+      } catch (err) {
+        tryCount++;
+
+        if (new Date() > expirationDate) await refreshAccessToken(domain, hubId);
+
+        await new Promise((resolve, reject) => setTimeout(resolve, 5000 * Math.pow(2, tryCount)));
+      }
+    }
+
+    if (!searchResult) throw new Error('Failed to fetch meetings for the 4th time. Aborting.');
+
+    const data = searchResult.results || [];
+
+    console.log('fetch meeting batch');
+
+    offsetObject.after = parseInt(searchResult.paging?.next?.after);
   }
 
   account.lastPulledDates.meetings = now;
