@@ -324,11 +324,12 @@ const processMeetings = async (domain, hubId, q) => {
     const meetingIds = data.map(meeting => meeting.id);
 
     const meetingIdsToAssociate = meetingIds;
+    const meetingInputsObject = meetingIdsToAssociate.map(meetingId => ({ id: meetingId }));
 
     const meetingAssociationsResults = (await (await hubspotClient.apiRequest({
       method: 'post',
       path: '/crm/v3/associations/meetings/contacts/batch/read',
-      body: { inputs: meetingIdsToAssociate.map(meetingId => ({ id: meetingId })) }
+      body: { inputs: meetingInputsObject }
     })).json())?.results || [];
 
     const meetingAssociations = Object.fromEntries(meetingAssociationsResults.map(a => {
