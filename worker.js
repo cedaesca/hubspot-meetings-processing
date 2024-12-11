@@ -321,6 +321,25 @@ const processMeetings = async (domain, hubId, q) => {
     console.log('fetch meeting batch');
 
     offsetObject.after = parseInt(searchResult.paging?.next?.after);
+    const meetingIds = data.map(meeting => meeting.id);
+
+    const meetingIdsToAssociate = meetingIds;
+
+    const meetingAssociationsResults = (await (await hubspotClient.apiRequest({
+      method: 'post',
+      path: '/crm/v3/associations/meetings/contacts/batch/read',
+      body: { inputs: meetingIdsToAssociate.map(meetingId => ({ id: meetingId })) }
+    })).json())?.results || [];
+
+    const meetingAssociations = Object.fromEntries(meetingAssociationsResults.map(a => {
+      if (!a.from) {
+        return false;
+      }
+
+      meetingIdsToAssociate.splice(meetingIdsToAssociate.indexOf(a.from.id), 1);
+
+      return [a.from.id, a.to.map(association => association.toObjectId)];
+    }).filter(x => x));
   }
 
   account.lastPulledDates.meetings = now;
