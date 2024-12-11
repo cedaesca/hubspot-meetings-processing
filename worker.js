@@ -312,7 +312,12 @@ const processMeetings = async (domain, hubId, q) => {
     let tryCount = 0;
     while (tryCount <= 4) {
       try {
-        searchResult = await hubspotClient.crm.contacts.searchApi.doSearch(searchObject);
+        searchResult = await hubspotClient.apiRequest({
+          method: 'post',
+          path: '/crm/v3/objects/meetings/search',
+          body: searchObject
+        }).json();
+        
         break;
       } catch (err) {
         tryCount++;
