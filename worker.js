@@ -274,6 +274,14 @@ const processMeetings = async (domain, hubId, q) => {
   const offsetObject = {};
   const limit = 100;
 
+  const meetingOutcome = {
+    scheduled: 'scheduled',
+    completed: 'completed',
+    rescheduled: 'rescheduled',
+    noShow: 'no show',
+    canceled: 'canceled'
+  };
+
   while (hasMore) {
     const lastModifiedDate = offsetObject.lastModifiedDate || lastPulledDate;
     const lastModifiedDateFilter = generateLastModifiedDateFilter(lastModifiedDate, now, 'hs_lastmodifieddate');
@@ -282,7 +290,9 @@ const processMeetings = async (domain, hubId, q) => {
       filterGroups: [lastModifiedDateFilter],
       sorts: [{ propertyName: 'hs_lastmodifieddate', direction: 'ASCENDING' }],
       properties: [
-        //
+        'hs_timestamp',
+        'hs_meeting_title',
+        'hs_meeting_outcome'
       ],
       limit,
       after: offsetObject.after
