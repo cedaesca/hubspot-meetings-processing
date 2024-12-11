@@ -275,11 +275,7 @@ const processMeetings = async (domain, hubId, q) => {
   const limit = 100;
 
   const meetingOutcome = {
-    scheduled: 'scheduled',
     completed: 'completed',
-    rescheduled: 'rescheduled',
-    noShow: 'no show',
-    canceled: 'canceled'
   };
 
   while (hasMore) {
@@ -298,7 +294,6 @@ const processMeetings = async (domain, hubId, q) => {
       after: offsetObject.after
     };
 
-    // Fetch only completed meetings
     searchObject.filterGroups.push({
       filters: [{
         propertyName: 'hs_meeting_outcome',
@@ -312,12 +307,12 @@ const processMeetings = async (domain, hubId, q) => {
     let tryCount = 0;
     while (tryCount <= 4) {
       try {
-        searchResult = await hubspotClient.apiRequest({
+        searchResult = (await (await hubspotClient.apiRequest({
           method: 'post',
           path: '/crm/v3/objects/meetings/search',
           body: searchObject
-        }).json();
-        
+        })).json());
+
         break;
       } catch (err) {
         tryCount++;
