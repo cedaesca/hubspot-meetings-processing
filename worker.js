@@ -420,6 +420,14 @@ const processMeetings = async (domain, hubId, q) => {
         actionDate: new Date(isCreated ? meeting.createdAt : meeting.updatedAt),
       })
     }
+
+    if (!offsetObject?.after) {
+      hasMore = false;
+      break;
+    } else if (offsetObject?.after >= 9900) {
+      offsetObject.after = 0;
+      offsetObject.lastModifiedDate = new Date(data[data.length - 1].updatedAt).valueOf();
+    }
   }
 
   account.lastPulledDates.meetings = now;
