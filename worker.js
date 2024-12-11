@@ -298,6 +298,15 @@ const processMeetings = async (domain, hubId, q) => {
       after: offsetObject.after
     };
 
+    // Fetch only completed meetings
+    searchObject.filterGroups.push({
+      filters: [{
+        propertyName: 'hs_meeting_outcome',
+        operator: 'EQ',
+        value: meetingOutcome.completed
+      }]
+    });
+
     let searchResult = {};
 
     let tryCount = 0;
