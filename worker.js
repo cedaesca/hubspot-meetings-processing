@@ -418,6 +418,7 @@ const processMeetings = async (domain, hubId, q) => {
       q.push({
         actionName: isCreated ? 'Meeting Created' : 'Meeting Updated',
         actionDate: new Date(isCreated ? meeting.createdAt : meeting.updatedAt),
+        ...actionTemplate
       })
     }
 
