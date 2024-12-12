@@ -1,24 +1,17 @@
-# API Sample Test
+# Code Quality and Readability Improvements
 
-## Getting Started
+In terms of readability and quality, one of the things that could be improved is abstraction. There are many functions that are several lines long; I think this could be abstracted into smaller pieces of code that improve readability and at the same time allow for reuse, such as the search logic and error handling when processing meetings, contacts, and companies.
 
-This project requires a newer version of Node. Don't forget to install the NPM packages afterwards.
+I noticed that a linting library is installed, so I would configure a hook to run before each commit and combine it with prettier to maintain a consistent code style.
 
-You should change the name of the ```.env.example``` file to ```.env```.
+It would be worht implementing unit tests for core functionality as well.
 
-Run ```node app.js``` to get things started. Hopefully the project should start without any errors.
+# Architecture
 
-## Explanations
+I'm an OOP enthusiast, but I noticed that this project follows a functional paradigm. In terms of architecture, I think I would further separate the functions into individual files with related functionality. Right now, within worker.js, there is a lot of code that is not very related to each other. For example, I think all the logic related to interacting with the HubSpot API should be in its own file, applying this same vision to the rest of the functions within worker.js.
 
-The actual task will be explained separately.
+# Code performance
 
-This is a very simple project that pulls data from HubSpot's CRM API. It pulls and processes company and contact data from HubSpot but does not insert it into the database.
+First, I would implement monitoring software to identify the points where performance may degrade and from there start to implement possible solutions. However, I think that one of the points where performance may falter is in the consumption of the HubSpot API, but this is due to the limitations of the API itself, forcing us to execute multiple requests to obtain the resources we need, as is the case with the processing of meetings.
 
-In HubSpot, contacts can be part of companies. HubSpot calls this relationship an association. That is, a contact has an association with a company. We make a separate call when processing contacts to fetch this association data.
-
-The Domain model is a record signifying a HockeyStack customer. You shouldn't worry about the actual implementation of it. The only important property is the ```hubspot```object in ```integrations```. This is how we know which HubSpot instance to connect to.
-
-The implementation of the server and the ```server.js``` is not important for this project.
-
-Every data source in this project was created for test purposes. If any request takes more than 5 seconds to execute, there is something wrong with the implementation.
-
+Similarly, it might be worth implementing battle-tested software for handling queues instead of using an in-house implementation.
