@@ -15,3 +15,10 @@ I'm an OOP enthusiast, but I noticed that this project follows a functional para
 First, I would implement monitoring software to identify the points where performance may degrade and from there start to implement possible solutions. However, I think that one of the points where performance may falter is in the consumption of the HubSpot API, but this is due to the limitations of the API itself, forcing us to execute multiple requests to obtain the resources we need, as is the case with the processing of meetings.
 
 Similarly, it might be worth implementing battle-tested software for handling queues instead of using an in-house implementation.
+
+# Extra Notes
+
+1. I made some assumptions regarding the meetings. It wasn't specifically mentioned in the instructions but since we want the attending contacts, I'm filtering meetings by `hs_meeting_outcome` to get only [the completed](https://developers.hubspot.com/beta-docs/guides/api/crm/engagements/meetings#properties) ones.
+
+2. I wasn't getting any results when running the app. Followed the instructions in the previous README and executed it a first time, but only got empty responses from the API, this was the same scenario for meetings. For this reason, I coded it sort of blinded and because given the lack of data, I couldn't confirm that it was indeed working as expected.
+
